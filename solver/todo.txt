@@ -1,0 +1,64 @@
+TODO
+
+(Some of these are already done.)
+
+. For victory board, show replay of all move-states to get the solution
+
+. For each block, check each 'corner' for an L-shaped filled with blocks and walls.
+
+  For example, if each 'x' here is either a block or a wall, then the puzzle is unsolveable.
+
+      Bx
+      xx
+
+. Replace manhattan distance with the 'true' distance to a solution space. How can you find
+  that? By solving for the puzzle made of only that block + the terrain. Assume the actor is in
+  each open-terrain adjacent spot, and find the cost to put the block in the target from that
+  configuration. Take the minimum of the costs for each actor-position assumption.
+
+   h-cost = cost of actor to nearest spot adjacent to nearest block +
+
+          sum ( for each block { min of each actor-assumption solution for that block alone } )
+
+   This is too expensive to do for each board, BUT can be memoized in a table so that the costs are
+   free. Also, this makes the 'corned' algorithm unnecessary.
+
+
+   To do this, the search algorithm has to be changed a little so that it takes the H function
+   as distinct from the puzzle board.
+
+
+   That way, the single-element solver can be given the manhattan distance, but the more
+   complex function can use the stateful decomposing H cost estimator that uses a cache of the
+   single solver results as part of its estimation process.
+
+
+   How can I pass in a stateful object as the H cost function?
+
+   I think I might need a trait for this?
+
+. Move fcost computation out of puzzle
+
+. Create function to split puzzle into subpuzzles, each with one of the original blocks.
+
+. Create cache from digest -> cost for subpuzzles.
+
+. Create function that gets the cost for a subpuzzle out of the cache, or if not found,
+    computes it using the manhattan cost + ida*.
+
+. Create 'composer' fcost function that computes the cost of the puzzle by creating a sum
+    over the per-block fcosts.
+
+. Account for sub-solver costs and number of invocations in solver stats
+
+
+. When computing a 'Composer' cost that is a sum of children, the entire search can be stopped
+   once the cost reaches the infinicost, and MAYBE when it exceeds the max hcost.
+
+. Use intelligent clustering.
+
+  a. Find the two closest nodes. If they are within, say 10 manhattans of each other, consider them a cluster.
+
+. When computing H costs, include walk time. Otherwise, if there is 50 units of walking
+  involved, I am guaranteeing 50 extra steps of unnecessary 'fan out'.
+
